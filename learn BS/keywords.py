@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 
 import requests
 
-def analyse_job(url):
+def analyseJob(url):
     try:
         job_html = requests.get(url)
     except:
@@ -23,4 +23,4 @@ def analyse_job(url):
     print 'C# count: {0}, SQL count: {1}, Angular count: {2}'.format(c_count, sql_count, angular_count)
 
 
-analyse_job('https://www.indeed.co.uk/cmp/Motion-Software/jobs/Software-Developer-f9e08782cc770ce8?q=Software+Developer')
+analyseJob('https://www.indeed.co.uk/cmp/Motion-Software/jobs/Software-Developer-f9e08782cc770ce8?q=Software+Developer')
