@@ -31,7 +31,7 @@ def getJobDetails(url):
     description = ""
 
     for d in descriptions_list:
-    description += d + "  "
+        description += d + "  "
 
     #Append collected data to dictionary
     attr_list = {}

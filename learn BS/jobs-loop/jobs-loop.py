@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
+import datetime
 import requests
-import time
+import time	
 import json
 import re
 
@@ -35,7 +36,7 @@ def getJobDetails(url):
 
     #Get job title
     b_tag = job_soup.find("b", {"class":"jobtitle"})
-    title = b_tag.font.text 
+    title = b_tag.font.text  
 
     #Get job location
     location = job_soup.find("span", {"class":"location"})
@@ -55,6 +56,9 @@ def getJobDetails(url):
     for d in descriptions_list:
         description += d + "  "
 
+    #Get job date
+    time = job_soup.find("span", {"class":"date"})    
+
     #Append collected data to dictionary
     attr_list = {}
 
@@ -65,10 +69,10 @@ def getJobDetails(url):
     return attr_list
 
 
-def findJobs(starting_page = 0, pages_limit = 2, location = 'Aberdeen', query = 'software developer'):
+def findJobs(starting_page = 0, pages_limit = 10, location = 'Aberdeen', query = 'IT'):
 	query_formatted = re.sub(' ', '+', query)
 	location_formatted = re.sub(' ', '+', location)
-	base_url = 'https://www.indeed.co.uk/jobs?q={0}&sort=date&l={1}&start='.format(query_formatted, location_formatted)
+	base_url = 'https://www.indeed.co.uk/jobs?q={0}&l={1}&start='.format(query_formatted, location_formatted)
 	global jobs_counter
 	jobs_counter = 0
 	jobs_list = []
@@ -91,7 +95,7 @@ def findJobs(starting_page = 0, pages_limit = 2, location = 'Aberdeen', query = 
 
 			jobs_counter = jobs_counter + 1
 	
-			time.sleep(15)
+			time.sleep(5)
 
 	print 'Extraction successful with a total of {0} jobs'.format(jobs_counter)
 
