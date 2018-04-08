@@ -1,6 +1,27 @@
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
-import requests, re, pandas as pd
+import requests, re, pandas as pd, math
+
+def getJobsNo(url):
+    try: 
+        results_html = requests.get(url)
+    except:
+        return
+
+    page_content = results_html.content
+    results_soup = BeautifulSoup(page_content, 'lxml')
+
+    no_jobs = results_soup.find_all('div', {'id': "searchCount"})
+    no_jobs = str(no_jobs)
+    no_jobs = no_jobs.decode('unicode_escape', 'ascii').encode('ascii', 'ignore')
+    no_jobs = re.sub(r'[a-zA-Z/<>"=]', '  ', no_jobs)
+    no_jobs = no_jobs.replace(',', '')
+    no_jobs = [int(s) for s in no_jobs.split() if s.isdigit()]
+
+    if int(no_jobs[2]) > 1000:
+        return 100
+    else:
+        return no_jobs[2]/10
 
 # Done with the help of goo.gl/yMaj4U
 def getJobsAttr(url):
@@ -99,48 +120,71 @@ def getDate(string):
     return date
 
 # Pandas documentation
-def createDataFrame(starting_page = 0, pages_limit = 1, location = 'Aberdeen'):
-    job_categories  = ['software developer', 'networking', 'tech support']
+def createDataFrame(starting_page = 0, location = 'Scotland'):
+    job_categories  = ['analyst', 'application developer', 
+                       'business analyst', 
+                       'computer scientist',
+                       'data analyst', 'database administrator',
+                       'graphic web designer', 
+                       'help desk technical support', 'help desk technician',
+                       'informatica developer', 'intelligence analyst', 'it auditor', 'it specialist',
+                       'j2ee developer', 'java developer',
+                       'kronos programmer', 
+                       'net developer', 'network engineer', 
+                       'oracle developer', 
+                       'programmer analyst', 
+                       'research analyst',
+                       'software developer', 'software engineer', 'systems analyst', 'software test engineer', 
+                       'unix engineer', 
+                       'web developer', 'web programmer', 
+                       'xml developer', 'xsd developer']
+
     location_format = re.sub('  ', '+', location)
 
     jobs_list = []
+    total_count = 0
 
     for category in job_categories:
         print "Searching for category: " + category, '\n'
 
         category_format = re.sub('  ', '+', category).lower()
         base_url        = 'https://www.indeed.co.uk/jobs?q={0}&l={1}&start='.format(category_format, location_format)
+        pages_limit     = getJobsNo(base_url + "0")
         
-        jobs_counter    = 0
+        cat_count       = 0
 
         for page in xrange(starting_page, starting_page + pages_limit):
-            print '\n', 'Extracting page ' + str(page+1), '\n'
             jobs_attr =  getJobsAttr(base_url + str(page*10))
 
-            for job in xrange(0, len(jobs_attr)):
-                job_title = jobs_attr[job]['job_title'].lower()
-                job_url   = jobs_attr[job]['job_url']
-                job_date  = getDate(jobs_attr[job]['job_date'])
-                job_descr = getJobText('http://indeed.co.uk' + job_url)
+            if jobs_attr:
+                print '\n', 'Extracting page ' + str(page+1), '\n'
+                for job in xrange(0, len(jobs_attr)):
+                    job_title = jobs_attr[job]['job_title'].lower()
+                    job_url   = jobs_attr[job]['job_url']
+                    job_date  = getDate(jobs_attr[job]['job_date'])
+                    job_descr = getJobText('http://indeed.co.uk' + job_url)
                 
-                job_attrs = []
-                job_attrs.append(category)
-		job_attrs.append(job_title)
-		job_attrs.append(job_date)
-		job_attrs.append(job_url)
-		job_attrs.append(job_descr)
+                    job_attrs = []
+                    job_attrs.append(category)
+		    job_attrs.append(job_title)
+		    job_attrs.append(job_date)
+		    job_attrs.append(job_url)
+		    job_attrs.append(job_descr)
 
-                jobs_list.append(job_attrs)
-                jobs_counter += 1
+                    jobs_list.append(job_attrs)
+                    cat_count += 1
+
+        print("Successfully extracted {0} jobs for the {1} job title").format(cat_count, category)
+        print("-----------------------------------------------------")
+        total_count += cat_count
 	
     headers = ['category', 'title', 'date', 'url', 'descr']
     jobs    = pd.DataFrame(jobs_list, columns=headers)
 
-    with open('jobs.csv', 'a') as f:
+    with open('jobs.csv', 'w') as f:
         jobs.to_csv(f, header=True, encoding='utf-8', index=False)
 
-    print(jobs)
-
+    print("Extraction successful with a total number of {0} jobs").format(total_count)
 
 if __name__ == '__main__':
     createDataFrame()
