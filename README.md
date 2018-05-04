@@ -22,7 +22,7 @@ To ensure proper functionality of the files, you would need to ensure the follow
 
 ### Installing
 
-The project does not need any instalation. However, the corpus and graphs are too large for upload on GitHub and have been added separately on Google Drive. In order to test the code or see the resulted graphs, including interactive Bokeh graphs, please download the file from [here](). Unzip the folder and add it to the root of this repository. Start the Python files via the command line or terminal by running the following command:  
+The project does not need any instalation. However, the corpus and graphs are too large for upload on GitHub and have been added separately on Google Drive. In order to test the code or see the resulted graphs, including interactive Bokeh graphs, please download the file from [here](https://drive.google.com/open?id=1F7DaM9fSehRO7E-4HuQck3MOhWJfWH84). Unzip the folder and add it to the root of this repository. Start the Python files via the command line or terminal by running the following command:  
 
 ```
 python extract-jobs.py
